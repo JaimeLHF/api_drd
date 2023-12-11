@@ -1,0 +1,78 @@
+org: jaimedb
+app: aws-node-http-api-project
+service: aws-node-http-api-project
+frameworkVersion: '3'
+
+params:
+  default:
+    dbName: cadastros
+  dev:
+    connectionString: mongodb://localhost:27017/${self:params.default.dbName}
+    salt: SJxV9oNKRtEks8un3W3jUZSkHwrxBOdZ
+    jwtsecret: UkBN0me9JRvODL8Olb9iszmWxuOYt74OJEeTfFtiajbTScOGL6iFcMjepagitemzj4DqbHtKV6JokQpdZg8u96EHRUklWoQV3HjSm2PlQdC8hekOlSUWZPTjcMn8DvHdFwkkG7FC63N9yRnHQwAPNuNXNWZfoXlZZNbwirr2t7LLUV5rw9uE8CBEghVQt1KWH9284t5RxmVBtDpSSOs3rITMj6Sh8L9m2tu0KwGszdH45Scl2rce4RIS9Qr8fYS3
+  prod:
+
+provider:
+  httpApi:
+    cors: true
+  name: aws
+  runtime: nodejs16.x
+  environment:
+    MONGODB_CONNECTIONSTRING: ${param:connectionString}
+    MONGODB_DB_NAME: ${param:dbName}
+    SALT: ${param:salt}
+    JWT_SECRET: ${param:jwtsecret}
+
+functions:
+  sendProduct:
+    handler: api/index.sendProduct
+    events:
+      - httpApi:
+          path: /api/product
+          method: post    
+          request:
+            schemas:
+              application/json: ${file(./api/schemas/produtos.json)}
+
+  sendAcabamento:
+    handler: api/index.sendAcabamento
+    events:
+      - httpApi:
+          path: /api/acab
+          method: post
+
+
+  getResult:
+    handler: api/index.getResult
+    events:
+      - httpApi:
+          path: /api/product/{id}
+          method: get
+  
+  login:
+    handler: api/index.login
+    events:
+      - httpApi:
+          path: /api/login
+          method: post
+          request:
+            schemas:
+              application/json: ${file(./api/schemas/login.json)}
+              
+  getAllResults:
+    handler: api/index.getAllResults
+    events:
+      - httpApi:
+          path: /api/results
+          method: get
+
+  deletResult:
+    handler: api/index.deletResult
+    events:
+      - httpApi:
+          path: /api/results/{id}
+          method: delete
+
+
+plugins:
+  - serverless-offline
